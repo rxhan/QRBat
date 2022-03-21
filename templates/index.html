@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block scripts %}
+  <script>
+    $(document).ready(function () {
+      $('#data').DataTable();
+    });
+  </script>
+{% endblock %}
+
+{% block content %}
+    <h1>{% block title %} Battery QR Code checker {% endblock %}</h1>
+
+<form action="validate" method="post" enctype="multipart/form-data">
+  <div class="form-group">
+    <label for="qrcodes">QR-Codes</label>
+    <textarea class="form-control" id="qrcodes" name="qrcodes" rows="6">{{ qrcodes }}</textarea>
+    <input name='file' type="file" accept="image/*" multiple capture="camera">
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+<br/>
+    {% for error in errors %}
+        <div class="error">{{ error }}</div>
+    {% endfor %}
+<br/><br/>
+  <table id="data" class="table table-striped">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Code</th>
+        <th>Vendor</th>
+        <th>Production Type</th>
+        <th>Cell Type</th>
+        <th>Model Code</th>
+        <th>Nominal Capacity</th>
+        <th>Factory Trace Code</th>
+        <th>Factory Address</th>
+        <th>Production Date</th>
+        <th>Serialnumber</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for code in codes %}
+        <tr>
+          <td>{{ code.nr }}</td>
+          <td>{{ code.code }}</td>
+          <td>{{ code.vendor }}</td>
+          <td>{{ code.production_type }}</td>
+          <td>{{ code.cell_type }}</td>
+          <td>{{ code.model_code }}</td>
+          <td>{{ code.capacity }}Ah</td>
+          <td>{{ code.factory_trace_code }}</td>
+          <td>{{ code.factory_address }}</td>
+          <td>{{ code.production_date_str }}</td>
+          <td>{{ code.serialnumber }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
