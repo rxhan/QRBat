@@ -49,6 +49,8 @@ class checker():
             self._vendor = 'CATL'
         elif value == '08B':
             self._vendor = 'LiShen'
+        elif value == '081':
+            self._vendor = 'REPT'
         elif value == '0B5':
             self._vendor = 'CALB'
         elif value == '0AL':
