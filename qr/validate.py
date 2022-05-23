@@ -1,7 +1,12 @@
 import datetime
 import re
+import enum
 
 class checker():
+    ProductionDateDay = {'0':0, '1':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,
+                         'A':10, 'B':11, 'C':12, 'D':13, 'E':14, 'F':15, 'G':16, 'H':17, 'I':None,
+                         'J':18, 'K':19, 'L':20, 'M':21, 'N':22, 'O':None, 'P':23, 'Q':None, 'R':24,
+                         'S':25, 'T':26, 'U':None, 'V':27, 'W':28, 'X':29, 'Y':30, 'Z':31}
     def __init__(self, code, nr=None):
         self._vendor = None
         self._production_type = None
@@ -186,12 +191,13 @@ class checker():
             raise Exception(f'Month in production Date not readable: {month}')
 
         day = value[2:3]
-        if re.match('[A-Z]', day):
-            day = -55 + ord(day)
-        elif re.match('[1-9]', day):
-            day = int(day)
+        if re.match(r'[\dA-Z]', day):
+            calc_day = self.ProductionDateDay[day.upper()]
+            if calc_day is None:
+                raise Exception(f'Day in production Date not readable: {day} result: {calc_day}')
+            day = calc_day
         else:
-            raise Exception(f'Month in production Date not readable: {day}')
+            raise Exception(f'Day in production Date not readable: {day}')
 
         try:
             self._production_date = datetime.datetime.strptime(f'{year}{str(month).zfill(2)}{str(day).zfill(2)}', '%Y%m%d')
