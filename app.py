@@ -1,8 +1,9 @@
 import os.path
 import time
 from qr import decodeimg
+import csv
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, json
 
 from qr.validate import checker
 
@@ -12,6 +13,16 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/addinfo', methods=['POST'])
+def addinfo():
+    with open('addinfo.csv', 'a', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=['qrcode','vendor','modelcode','capacity','factoryaddress'], delimiter=';')
+        writer.writerow(request.form)
+
+        print(request.form['qrcode'], request.form['vendor'], request.form['modelcode'], request.form['capacity'], request.form['factoryaddress'])
+
+    return "done"
 
 @app.route('/validate', methods=['GET', 'POST'])
 def validate():
@@ -58,9 +69,11 @@ def validate():
                     qrcodes.append(checker(code, i))
 
                 except Exception as e:
-                    errors.append(f'{str(i).zfill(4)} - ERROR: {e} Input: {code}')
+                    error = {'text': f'{str(i).zfill(4)} - ERROR: {e} Input: {code}', 'qrcode': code}
+                    errors.append(error)
             else:
-                errors.append(f'{str(i).zfill(4)} - Ignore empty line')
+                error = {'text': f'{str(i).zfill(4)} - Ignore empty line', 'qrcode': ''}
+                errors.append(error)
 
             i += 1
 

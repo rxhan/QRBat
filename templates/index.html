@@ -18,12 +18,49 @@
                 ]
             } );
         } );
+
+        var addinfo_template =
+
+        $(document).ready(function () {
+          $("#error > div > a").click(function () {
+            this.outerHTML = '<form method="post" id="addinfo_' + this.id.substring(3) + '"><input type="hidden" id="qrcode" name="qrcode" value="' + this.id.substring(3) + '"><label for="vendor">Vendor:</label><input type="text" id="vendor" class="form-control" name="vendor"><label for="modelcode">Model code:</label><input type="text" id="modelcode" class="form-control" name="modelcode"><label for="capacity">Nominal capacity:</label><input type="text" id="capacity" class="form-control" name="capacity"><label for="factoryaddress">Factory address:</label><input type="text" id="factoryaddress" class="form-control" name="factoryaddress"><button type="submit">Submit</button></form>';
+
+              $("#addinfo_" + this.id.substring(3)).submit(function (event) {
+                var formData = {
+                  vendor: $("#vendor").val(),
+                  modelcode: $("#modelcode").val(),
+                  capacity: $("#capacity").val(),
+                  factoryaddress: $("#factoryaddress").val(),
+                  qrcode: $("#qrcode").val(),
+                };
+
+                $.ajax({
+                  type: "POST",
+                  url: "/qrcode/addinfo",
+                  data: formData,
+                  dataType: "html",
+                  encode: true,
+                }).done(function (data) {
+                  $('#addinfo_' + formData.qrcode)[0].outerHTML = 'Thank you for your help! Barcode ' + formData.qrcode + ' is submitted!';
+                }).fail(function() {
+                  $('#addinfo_' + formData.qrcode)[0].outerHTML = 'Error while sending Data!'
+                }).always(function() {
+                  $('#error_' + formData.qrcode)[0].remove()
+                });
+
+                event.preventDefault();
+              });
+          });
+
+        });
+
     </script>
 
 {% endblock %}
 
 {% block content %}
     <h1>{% block title %} Battery QR Code checker {% endblock %}</h1>
+    <p>This QR code tester is still in development. It does not recognize all possible QR codes because the documentation is not available. Therefore, we rely on feedback and would ask that you fill out the displayed help form for any QR codes that are not recognized.</p>
 
 <form action="validate" method="post" enctype="multipart/form-data">
   <div class="form-group">
@@ -34,9 +71,12 @@
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 <br/>
+    <div id="error">
     {% for error in errors %}
-        <div class="error">{{ error }}</div>
+        <div id="error_{{ error['qrcode'] }}" class="error">{{ error['text'] }}</div>
+        <div><a href="#" id="qr_{{ error['qrcode'] }}">Help to detect this Barcode properly:</a></div>
     {% endfor %}
+    </div>
 <br/><br/>
   <table id="data" class="table table-striped">
     <thead>
