@@ -9,8 +9,10 @@ class checker():
                          'S':25, 'T':26, 'U':None, 'V':27, 'W':28, 'X':29, 'Y':30, 'Z':31}
     def __init__(self, code, nr=None):
         self._vendor = None
+        self._vendor_code = None
         self._production_type = None
         self._cell_type = None
+        self._cellmodel_code = None
         self._model_code = None
         self._factory_trace_code = None
         self._factory_address = None
@@ -54,6 +56,8 @@ class checker():
             self._vendor = 'CATL'
         elif value == '08B':
             self._vendor = 'LiShen'
+        elif value == '02C':
+            self._vendor = 'LiShen'
         elif value == '081':
             self._vendor = 'REPT'
         elif value == '0B5':
@@ -62,6 +66,9 @@ class checker():
             self._vendor = 'Ganfeng'
         else:
             raise Exception(f'Vendor unknown: {value}')
+
+        self._vendor_code = value
+
 
     vendor = property(get_vendor, set_vendor)
 
@@ -103,35 +110,60 @@ class checker():
         return self._model_code
 
     def set_model_code(self, value):
-        if value == '76':
-            self._model_code = 'LF280K'
-            self.capacity = 280
-        elif value == '71':
-            self._model_code = 'LF280N'
-            self.capacity = 280
-        elif value == '72':
-            self._model_code = 'LF230'
-            self.capacity = 230
-        elif value == '73':
-            self._model_code = 'LF304'
-            self.capacity = 304
-        elif value == '75':
-            self._model_code = 'LF105'
-            self.capacity = 105
-        elif value == '66':
-            self._model_code = 'LF280'
-            self.capacity = 280
-        elif value == '68':
-            self._model_code = 'LF50K'
-            self.capacity = 50
-        elif value == '24': # Only CATL?
-            self._model_code = 'unknown'
-            self.capacity = 302
-        elif value == 'PB': # Only Lishen?
-            self._model_code = 'unknown'
-            self._capacity = 272
+        # Model-Codes for EVE
+        if self._vendor_code in ('04Q', '02Y'):
+            if value == '76':
+                self._model_code = 'LF280K'
+                self.capacity = 280
+            elif value == '71':
+                self._model_code = 'LF280N'
+                self.capacity = 280
+            elif value == '72':
+                self._model_code = 'LF230'
+                self.capacity = 230
+            elif value == '73':
+                self._model_code = 'LF304'
+                self.capacity = 304
+            elif value == '75':
+                self._model_code = 'LF105'
+                self.capacity = 105
+            elif value == '66':
+                self._model_code = 'LF280'
+                self.capacity = 280
+            elif value == '68':
+                self._model_code = 'LF50K'
+                self.capacity = 50
+            else:
+                raise Exception(f'Model Code for {self.vendor} unknown: {value}')
+
+        # Model-Codes for CATL
+        elif self._vendor_code in ('001'):
+            if value == '24': # Only CATL?
+                self._model_code = 'unknown'
+                self.capacity = 302
+            else:
+                raise Exception(f'Model Code for {self.vendor} unknown: {value}')
+
+        # Model-Codes for Lishen
+        elif self._vendor_code in ('08B', '02C'):
+            if value == 'PB':
+                self._model_code = 'unknown'
+                self._capacity = 272
+            elif value == 'PC':
+                self._model_code = 'unknown'
+                self._capacity = 200
+            elif value == 'PE':
+                self._model_code = 'unknown'
+                self._capacity = 190
+            elif value == 'NA':
+                self._model_code = 'unknown'
+                self._capacity = 202
+            else:
+                raise Exception(f'Model Code for {self.vendor} unknown: {value}')
         else:
-            raise Exception(f'Model Code unknown: {value}')
+            raise Exception(f'Model Code for {self.vendor} unknown: {value}')
+
+        self._cellmodel_code = value
 
     model_code = property(get_model_code, set_model_code)
 
@@ -152,16 +184,18 @@ class checker():
         return self._factory_address
 
     def set_factory_address(self, value):
-        if value == 'J':
+        if value == 'J': # eve
             self._factory_address = 'Jingmen'
-        elif value == 'H':
+        elif value == 'H': # eve
             self._factory_address = 'Huizhou'
         elif value == '3': # CATL
             self._factory_address = 'unknown'
         elif value == '1':  # LiShen
             self._factory_address = 'unknown'
+        elif value == '2':  # LiShen
+            self._factory_address = 'unknown'
         else:
-            raise Exception(f'Factory Address unknown: {value}')
+            raise Exception(f'Factory Address for {self.vendor} unknown: {value}')
 
     factory_address = property(get_factory_address, set_factory_address)
 
